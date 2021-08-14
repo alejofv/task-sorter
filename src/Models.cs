@@ -33,9 +33,10 @@ namespace TaskSorter
             this._dependencies = new List<MyTask>();
         }
 
-        public void DependsOn(MyTask task)
+        public MyTask DependsOn(MyTask task)
         {
             this._dependencies.Add(task);
+            return this;
         }
     }
 

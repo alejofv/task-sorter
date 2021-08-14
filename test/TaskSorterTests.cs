@@ -36,21 +36,22 @@ namespace test
             var tfinal = new MyTask("tfinal");
 
             // t1 -> t2 -> tfinal
-            t2.DependsOn(t1);
-            tfinal.DependsOn(t2);
-
             // t3 -> tfinal
-            tfinal.DependsOn(t3);
+            tfinal
+                .DependsOn(
+                    t2.DependsOn(t1))
+                .DependsOn(t3);
 
-            Assert.AreEqual(2, t2.Priority);
+            Assert.AreEqual(1, t1.Priority);
             Assert.AreEqual(1, t3.Priority);
+            Assert.AreEqual(2, t2.Priority);
             Assert.AreEqual(3, tfinal.Priority);
         }
 
         [TestMethod]
         public async Task BuildTaskSet_GivenTasks_ReturnsOk()
         {
-            var lines = AsyncEnumerableOfStringGenerator("t1->t2", "t2->t3", "t3->t4");
+            var lines = Generator("t1->t2", "t2->t3", "t3->t4");
             var taskSet = await MyTaskSet.Build(lines);
 
             Assert.AreEqual(4, taskSet.Count);
@@ -60,14 +61,14 @@ namespace test
         [ExpectedException(typeof(ArgumentException))]
         public async Task BuildTaskSet_GivenInvalidLine_ThrowsException()
         {
-            var lines = AsyncEnumerableOfStringGenerator("t1-t2");
+            var lines = Generator("t1-t2");
             _ = await MyTaskSet.Build(lines);
         }
 
         [TestMethod]
         public async Task SortTaskSet_GivenSequentialTasks_ReturnsOk()
         {
-            var lines = AsyncEnumerableOfStringGenerator("t1->t2", "t2->t3");
+            var lines = Generator("t1->t2", "t2->t3");
             var taskSet = await MyTaskSet.Build(lines);
             var sorted = taskSet.Sort();
 
@@ -89,7 +90,7 @@ namespace test
         [TestMethod]
         public async Task SortTaskSet_GivenInvertedTasks_ReturnsOk()
         {
-            var lines = AsyncEnumerableOfStringGenerator("t2->t3", "t1->t2");
+            var lines = Generator("t2->t3", "t1->t2");
             var taskSet = await MyTaskSet.Build(lines);
             var sorted = taskSet.Sort();
 
@@ -103,7 +104,7 @@ namespace test
         [TestMethod]
         public async Task SortTaskSet_GivenSampleData_ReturnsOk()
         {
-            var lines = AsyncEnumerableOfStringGenerator(
+            var lines = Generator(
                 "Design floor plans->Review and edit plans",
                 "Review and edit plans->Prepare the ground",
                 "Frame the structure->Siding",
@@ -135,7 +136,8 @@ namespace test
             Assert.AreEqual(8, sorted[5].Tasks.Count);
         }
 
-        private async IAsyncEnumerable<string> AsyncEnumerableOfStringGenerator(params string[] lines)
+        // Helper method to generate an IAsyncEnumerable
+        private async IAsyncEnumerable<string> Generator(params string[] lines)
         {
             await Task.Yield();
             
