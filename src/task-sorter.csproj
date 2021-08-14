@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>llamazoo_test</RootNamespace>
+    <RootNamespace>TaskSorter</RootNamespace>
   </PropertyGroup>
 
 </Project>

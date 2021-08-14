@@ -43,6 +43,8 @@ namespace TaskSorter
     {
         private List<MyTask> _tasks;
 
+        public int Count => _tasks.Count;
+
         protected MyTaskSet(List<MyTask> tasks)
         {
             _tasks = tasks;
@@ -62,7 +64,7 @@ namespace TaskSorter
             {
                 var parts = line.Split("->");
                 if (parts.Length != 2)
-                    throw new Exception("Invalid task line: " + line);
+                    throw new ArgumentException("Invalid task line: " + line);
                 
                 if (!dict.TryGetValue(parts[0], out MyTask task))
                 {
