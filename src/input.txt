@@ -1,0 +1,18 @@
+Design floor plans->Review and edit plans
+Review and edit plans->Prepare the ground
+Frame the structure->Siding
+Frame the structure->Landscaping
+Prepare the ground->Pour the foundation
+Pour the foundation->Frame the structure
+Frame the structure->Plumbing
+Electrical->Drywall
+Frame the structure->Roofing
+HVAC->Drywall
+Drywall->Paint
+Frame the structure->Electrical
+Frame the structure->HVAC
+Plumbing->Drywall
+Paint->Carpet
+Frame the structure->Windows
+Roofing->Shingles
+Frame the structure->Driveway
