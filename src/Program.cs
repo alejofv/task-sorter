@@ -12,7 +12,7 @@ namespace TaskSorter
         {
             var fileContents = ReadFile(args);
 
-            var taskSet = await MyTaskSet.Build(fileContents);
+            var taskSet = await TaskSet.Build(fileContents);
             var sortedTasks = taskSet.Sort();
 
             PrintTasks(sortedTasks);
@@ -38,9 +38,9 @@ namespace TaskSorter
         /// Prints the prioritized tasks.
         /// For tasks that can be done at the same time, list them on the same line separated by commas
         /// </summary>
-        private static void PrintTasks(List<(int Priority, List<MyTask> Tasks)> prioritizedTasks)
+        private static void PrintTasks(List<(int Priority, List<MyTask> Tasks)> sortedTasks)
         {
-            foreach (var tasks in prioritizedTasks.Select(x => x.Tasks))
+            foreach (var tasks in sortedTasks.Select(x => x.Tasks))
                 Console.WriteLine(string.Join(", ", tasks.Select(t => t.Name)));
         }
     }

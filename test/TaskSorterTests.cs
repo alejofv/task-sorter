@@ -52,7 +52,7 @@ namespace test
         public async Task BuildTaskSet_GivenTasks_ReturnsOk()
         {
             var lines = Generator("t1->t2", "t2->t3", "t3->t4");
-            var taskSet = await MyTaskSet.Build(lines);
+            var taskSet = await TaskSet.Build(lines);
 
             Assert.AreEqual(4, taskSet.Count);
         }
@@ -62,27 +62,28 @@ namespace test
         public async Task BuildTaskSet_GivenInvalidLine_ThrowsException()
         {
             var lines = Generator("t1-t2");
-            _ = await MyTaskSet.Build(lines);
+            _ = await TaskSet.Build(lines);
         }
 
         [TestMethod]
-        public async Task SortTaskSet_GivenSequentialTasks_ReturnsOk()
+        public async Task SortTaskSet_GivenTasks_ReturnsOk()
         {
             var lines = Generator("t1->t2", "t2->t3");
-            var taskSet = await MyTaskSet.Build(lines);
+            var taskSet = await TaskSet.Build(lines);
             var sorted = taskSet.Sort();
 
             Assert.AreEqual(3, sorted.Count);
 
             Assert.AreEqual(1, sorted[0].Priority);
+            Assert.AreEqual(2, sorted[1].Priority);
+            Assert.AreEqual(3, sorted[2].Priority);
+
             Assert.AreEqual(1, sorted[0].Tasks.Count);
             Assert.AreEqual("t1", sorted[0].Tasks[0].Name);
 
-            Assert.AreEqual(2, sorted[1].Priority);
             Assert.AreEqual(1, sorted[1].Tasks.Count);
             Assert.AreEqual("t2", sorted[1].Tasks[0].Name);
 
-            Assert.AreEqual(3, sorted[2].Priority);
             Assert.AreEqual(1, sorted[2].Tasks.Count);
             Assert.AreEqual("t3", sorted[2].Tasks[0].Name);
         }
@@ -91,7 +92,7 @@ namespace test
         public async Task SortTaskSet_GivenInvertedTasks_ReturnsOk()
         {
             var lines = Generator("t2->t3", "t1->t2");
-            var taskSet = await MyTaskSet.Build(lines);
+            var taskSet = await TaskSet.Build(lines);
             var sorted = taskSet.Sort();
 
             Assert.AreEqual(3, sorted.Count);
@@ -125,7 +126,7 @@ namespace test
                 "Frame the structure->Driveway"
             );
 
-            var taskSet = await MyTaskSet.Build(lines);
+            var taskSet = await TaskSet.Build(lines);
             var sorted = taskSet.Sort();
 
             Assert.AreEqual(9, sorted.Count);

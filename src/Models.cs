@@ -36,53 +36,65 @@ namespace TaskSorter
         public MyTask DependsOn(MyTask task)
         {
             this._dependencies.Add(task);
+            // allow chaining for fluent-like calls in UnitTests :)
             return this;
         }
     }
 
-    public class MyTaskSet
+    public class TaskSet
     {
         private List<MyTask> _tasks;
 
+        // Used by UnitTests to verify the set
         public int Count => _tasks.Count;
 
-        protected MyTaskSet(List<MyTask> tasks)
+        protected TaskSet(List<MyTask> tasks)
         {
             _tasks = tasks;
         }
 
         /// <summary>
-        /// Builds a task set from a line collection.
-        /// Each line consists of a dependency and the task that it is 
-        /// dependent on it. The dependency and task will be separated by an arrow (denoted by "->").
+        /// Builds a task set from a text line collection, adding dependencies between tasks
         /// </summary>
-        public static async Task<MyTaskSet> Build(IAsyncEnumerable<string> lines)
+        public static async Task<TaskSet> Build(IAsyncEnumerable<string> lines)
         {
             // Use a dictionary to lookup already added tasks
             var dict = new Dictionary<string, MyTask>();
 
             await foreach (var line in lines)
             {
-                var parts = line.Split("->");
-                if (parts.Length != 2)
-                    throw new ArgumentException("Invalid task line: " + line);
-                
-                if (!dict.TryGetValue(parts[0], out MyTask task))
-                {
-                    task = new MyTask(parts[0]);
-                    dict.Add(task.Name, task);
-                }
-
-                if (!dict.TryGetValue(parts[1], out MyTask dependentTask))
-                {
-                    dependentTask = new MyTask(parts[1]);
-                    dict.Add(dependentTask.Name, dependentTask);
-                }
-
+                // Add task dependency
+                var (task, dependentTask) = GetTasks(line, dict);
                 dependentTask.DependsOn(task);
             }
 
-            return new MyTaskSet(dict.Values.ToList());
+            return new TaskSet(dict.Values.ToList());
+        }
+
+        /// <summary>
+        /// Returns the task and the task it depends on, parsing a text line
+        /// Each line consists of a dependency and the task that it is 
+        /// dependent on it. The dependency and task will be separated by an arrow (denoted by "->").
+        /// </summary>
+        private static (MyTask Task, MyTask DependentTask) GetTasks(string line, Dictionary<string, MyTask> taskDictionary)
+        {
+            var names = line.Split("->");
+            if (names.Length != 2)
+                throw new ArgumentException("Invalid text line: " + line);
+                
+            if (!taskDictionary.TryGetValue(names[0], out MyTask task))
+            {
+                task = new MyTask(names[0]);
+                taskDictionary.Add(task.Name, task);
+            }
+
+            if (!taskDictionary.TryGetValue(names[1], out MyTask dependentTask))
+            {
+                dependentTask = new MyTask(names[1]);
+                taskDictionary.Add(dependentTask.Name, dependentTask);
+            }
+
+            return (task, dependentTask);
         }
 
         /// <summary>
