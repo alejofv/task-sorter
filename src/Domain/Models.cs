@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TaskSorter
+namespace TaskSorter.Domain
 {
     public class MyTask
     {
@@ -56,15 +56,15 @@ namespace TaskSorter
         /// <summary>
         /// Builds a task set from a text line collection, adding dependencies between tasks
         /// </summary>
-        public static async Task<TaskSet> Build(IAsyncEnumerable<string> lines)
+        public static async Task<TaskSet> Build(IAsyncEnumerable<TaskPair> tasks)
         {
             // Use a dictionary to lookup already added tasks
             var dict = new Dictionary<string, MyTask>();
 
-            await foreach (var line in lines)
+            await foreach (var pair in tasks)
             {
                 // Add task dependency
-                var (task, dependentTask) = GetTasks(line, dict);
+                var (task, dependentTask) = GetTasks(pair, dict);
                 dependentTask.DependsOn(task);
             }
 
@@ -76,21 +76,17 @@ namespace TaskSorter
         /// Each line consists of a dependency and the task that it is 
         /// dependent on it. The dependency and task will be separated by an arrow (denoted by "->").
         /// </summary>
-        private static (MyTask Task, MyTask DependentTask) GetTasks(string line, Dictionary<string, MyTask> taskDictionary)
+        private static (MyTask Task, MyTask DependentTask) GetTasks(TaskPair taskPair, Dictionary<string, MyTask> taskDictionary)
         {
-            var names = line.Split("->");
-            if (names.Length != 2)
-                throw new ArgumentException("Invalid text line: " + line);
-                
-            if (!taskDictionary.TryGetValue(names[0], out MyTask task))
+            if (!taskDictionary.TryGetValue(taskPair.Task, out MyTask task))
             {
-                task = new MyTask(names[0]);
+                task = new MyTask(taskPair.Task);
                 taskDictionary.Add(task.Name, task);
             }
 
-            if (!taskDictionary.TryGetValue(names[1], out MyTask dependentTask))
+            if (!taskDictionary.TryGetValue(taskPair.Dependency, out MyTask dependentTask))
             {
-                dependentTask = new MyTask(names[1]);
+                dependentTask = new MyTask(taskPair.Dependency);
                 taskDictionary.Add(dependentTask.Name, dependentTask);
             }
 
@@ -101,10 +97,10 @@ namespace TaskSorter
         /// Calculates the priority for each task in the set and returns a list of tasks sorted by priority.
         /// For tasks that can be done at the same time, sort them in alphabetical order
         /// </summary>
-        public List<(int Priority, List<MyTask> Tasks)> Sort()
+        public List<SortedTasks> Sort()
             => _tasks
                 .GroupBy(x => x.Priority)
-                .Select(g => (Priority: g.Key, g.OrderBy(t => t.Name).ToList()))
+                .Select(g => new SortedTasks(g.Key, g.OrderBy(t => t.Name).ToList()))
                 .OrderBy(t => t.Priority)
                 .ToList();
     }
