@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TaskSorter.Domain;
 
 namespace TaskSorter
 {
@@ -9,10 +10,8 @@ namespace TaskSorter
         /// <summary>
         /// Reads a collection of task pairs (task and dependency) from the input
         /// </summary>
-        IAsyncEnumerable<TaskPair> ReadInput();
+        IAsyncEnumerable<TaskNames> ReadInput();
     }
-
-    public record TaskPair (string Task, string Dependency);
 
     // Default implementation - Read from file
     
@@ -29,7 +28,7 @@ namespace TaskSorter
         }
 
         /// <inheritdoc />
-        public async IAsyncEnumerable<TaskPair> ReadInput()
+        public async IAsyncEnumerable<TaskNames> ReadInput()
         {
             // Use an IAsyncEnumerable so we can read line by line without loading the full file in memory.
             using (var reader = File.OpenText(_fileName))
@@ -41,7 +40,7 @@ namespace TaskSorter
                     if (names.Length != 2)
                         throw new ArgumentException("Invalid text line: " + line);
 
-                    yield return new TaskPair(names[0], names[1]);
+                    yield return new TaskNames(names[0], names[1]);
                 }
             }
         }

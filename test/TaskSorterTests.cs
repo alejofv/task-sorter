@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TaskSorter;
+using TaskSorter.Domain;
 
 namespace test
 {
@@ -55,14 +56,6 @@ namespace test
             var taskSet = await TaskSet.Build(lines);
 
             Assert.AreEqual(4, taskSet.Count);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public async Task BuildTaskSet_GivenInvalidLine_ThrowsException()
-        {
-            var lines = Generator("t1-t2");
-            _ = await TaskSet.Build(lines);
         }
 
         [TestMethod]
@@ -138,12 +131,12 @@ namespace test
         }
 
         // Helper method to generate an IAsyncEnumerable
-        private async IAsyncEnumerable<string> Generator(params string[] lines)
+        private async IAsyncEnumerable<TaskNames> Generator(params string[] lines)
         {
             await Task.Yield();
             
             foreach (var line in lines)
-                yield return line;
+                yield return new TaskNames(line.Split("->")[0], line.Split("->")[1]);
         }
     }
 }

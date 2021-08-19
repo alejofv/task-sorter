@@ -56,7 +56,7 @@ namespace TaskSorter.Domain
         /// <summary>
         /// Builds a task set from a text line collection, adding dependencies between tasks
         /// </summary>
-        public static async Task<TaskSet> Build(IAsyncEnumerable<TaskPair> tasks)
+        public static async Task<TaskSet> Build(IAsyncEnumerable<TaskNames> tasks)
         {
             // Use a dictionary to lookup already added tasks
             var dict = new Dictionary<string, MyTask>();
@@ -76,7 +76,7 @@ namespace TaskSorter.Domain
         /// Each line consists of a dependency and the task that it is 
         /// dependent on it. The dependency and task will be separated by an arrow (denoted by "->").
         /// </summary>
-        private static (MyTask Task, MyTask DependentTask) GetTasks(TaskPair taskPair, Dictionary<string, MyTask> taskDictionary)
+        private static (MyTask Task, MyTask DependentTask) GetTasks(TaskNames taskPair, Dictionary<string, MyTask> taskDictionary)
         {
             if (!taskDictionary.TryGetValue(taskPair.Task, out MyTask task))
             {
@@ -97,11 +97,15 @@ namespace TaskSorter.Domain
         /// Calculates the priority for each task in the set and returns a list of tasks sorted by priority.
         /// For tasks that can be done at the same time, sort them in alphabetical order
         /// </summary>
-        public List<SortedTasks> Sort()
+        public List<PrioritizedTasks> Sort()
             => _tasks
                 .GroupBy(x => x.Priority)
-                .Select(g => new SortedTasks(g.Key, g.OrderBy(t => t.Name).ToList()))
+                .Select(g => new PrioritizedTasks(g.Key, g.OrderBy(t => t.Name).ToList()))
                 .OrderBy(t => t.Priority)
                 .ToList();
     }
+
+    public record TaskNames (string Task, string Dependency);
+
+    public record PrioritizedTasks (int Priority, List<MyTask> Tasks);
 }
