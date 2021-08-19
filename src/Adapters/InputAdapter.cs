@@ -35,7 +35,11 @@ namespace TaskSorter
             {
                 while (!reader.EndOfStream)
                 {
+                    // Each line consists of a dependency and the task that it is 
+                    // dependent on it. The dependency and task will be separated by an arrow (denoted by "->").
+                    
                     var line = await reader.ReadLineAsync();
+                    
                     var names = line.Split("->");
                     if (names.Length != 2)
                         throw new ArgumentException("Invalid text line: " + line);

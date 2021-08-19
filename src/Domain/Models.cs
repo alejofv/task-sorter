@@ -10,7 +10,7 @@ namespace TaskSorter.Domain
         private List<MyTask> _dependencies;
         private int? _priority;
 
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// The priority of this task, calculated as the maximum priority of the dependencies, plus one
@@ -30,7 +30,7 @@ namespace TaskSorter.Domain
         public MyTask(string name)
         {
             this.Name = name;
-            this._dependencies = new List<MyTask>();
+            this._dependencies = new();
         }
 
         public MyTask DependsOn(MyTask task)
@@ -72,9 +72,7 @@ namespace TaskSorter.Domain
         }
 
         /// <summary>
-        /// Returns the task and the task it depends on, parsing a text line
-        /// Each line consists of a dependency and the task that it is 
-        /// dependent on it. The dependency and task will be separated by an arrow (denoted by "->").
+        /// Returns the task and the task it depends on
         /// </summary>
         private static (MyTask Task, MyTask DependentTask) GetTasks(TaskNames taskPair, Dictionary<string, MyTask> taskDictionary)
         {
